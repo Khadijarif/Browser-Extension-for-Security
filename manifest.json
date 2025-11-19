@@ -1,0 +1,41 @@
+{
+  "manifest_version": 3,
+  "name": "Security Sentinel",
+  "version": "2.0.0",
+  "description": "Advanced phishing detection & security auditing with VirusTotal integration",
+  
+  "permissions": [
+    "cookies",
+    "storage", 
+    "activeTab",
+    "webNavigation"
+  ],
+  
+  "host_permissions": [
+    "<all_urls>",
+    "https://www.virustotal.com/"
+  ],
+  
+  "background": {
+    "service_worker": "background.js"
+  },
+  
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["security-audit.js"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "View Security Analysis"
+  },
+  
+  "icons": {
+    "48": "icons/icon48.svg",
+    "128": "icons/icon128.svg"
+  }
+}

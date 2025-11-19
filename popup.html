@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Security Sentinel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 450px;
+            min-height: 550px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .header .subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-left: 4px solid;
+        }
+
+        .card.safe {
+            border-left-color: #28a745;
+        }
+
+        .card.warning {
+            border-left-color: #ffc107;
+        }
+
+        .card.danger {
+            border-left-color: #dc3545;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .risk-badge {
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .risk-high { background: #dc3545; }
+        .risk-medium { background: #ffc107; color: black; }
+        .risk-low { background: #28a745; }
+
+        .confidence-bar {
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .confidence-high { background: #dc3545; }
+        .confidence-medium { background: #ffc107; }
+        .confidence-low { background: #28a745; }
+
+        .warning-list {
+            list-style: none;
+            margin-top: 10px;
+        }
+
+        .warning-item {
+            padding: 8px;
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+            margin-bottom: 5px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .warning-item::before {
+            content: "⚠️";
+        }
+
+        .cookie-item {
+            padding: 10px;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+        }
+
+        .cookie-name {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 5px;
+        }
+
+        .cookie-flags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 5px;
+        }
+
+        .flag {
+            padding: 2px 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            font-size: 11px;
+            color: #6c757d;
+        }
+
+        .flag.missing {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .cookie-issues {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .security-score {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+
+        .score-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: conic-gradient(#28a745 0% var(--score-percent), #e9ecef var(--score-percent) 100%);
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .stat-item {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #6c757d;
+            margin-top: 2px;
+        }
+
+        .analysis-info {
+            background: #e7f3ff;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 12px;
+        }
+
+        .vt-info {
+            background: #f0f8ff;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 12px;
+            border-left: 3px solid #4dabf7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛡️ Security Sentinel</h1>
+            <div class="subtitle">Real-time Phishing & Security Analysis
+            <p> Use your own VirusTotal API Key! </div>
+        </div>
+
+        <div id="loading" class="loading">
+            <div>Analyzing current page...</div>
+        </div>
+
+        <div id="content" style="display: none;">
+            <!-- Analysis Stats -->
+            <div class="card">
+                <div class="card-title">📊 Analysis Statistics</div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalAnalyses">0</div>
+                        <div class="stat-label">Total Analyses</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="threatsFound">0</div>
+                        <div class="stat-label">Threats Found</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="avgTime">0ms</div>
+                        <div class="stat-label">Avg. Time</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="currentTime">0ms</div>
+                        <div class="stat-label">This Analysis</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Phishing Analysis Card -->
+            <div class="card" id="phishingCard">
+                <div class="card-title">
+                    🌐 Domain Analysis
+                    <span class="risk-badge" id="riskBadge">LOW</span>
+                </div>
+                <div class="confidence-bar">
+                    <div class="confidence-fill" id="confidenceBar" style="width: 0%"></div>
+                </div>
+                <div style="font-size: 14px; color: #6c757d;">
+                    Confidence: <span id="confidenceText">0%</span>
+                </div>
+                
+                <!-- VirusTotal Info -->
+                <div id="vtInfo" class="vt-info" style="display: none;">
+                    <strong>VirusTotal:</strong> <span id="vtDetections">0</span>/<span id="vtTotal">0</span> vendors detected threats
+                </div>
+                
+                <!-- Analysis Time -->
+                <div class="analysis-info">
+                    <strong>Analysis Time:</strong> <span id="analysisTime">0</span>ms
+                </div>
+                
+                <ul class="warning-list" id="warningList"></ul>
+            </div>
+
+            <!-- Cookie Security Card -->
+            <div class="card">
+                <div class="card-title">🍪 Cookie Security</div>
+                <div id="cookieSummary" style="margin-bottom: 15px;">
+                    Scanning cookies...
+                </div>
+                <div id="cookieList"></div>
+            </div>
+
+            <!-- Security Score -->
+            <div class="security-score">
+                <div class="card-title" style="justify-content: center;">📊 Security Score</div>
+                <div class="score-circle" id="scoreCircle" style="--score-percent: 0%">
+                    <span id="scoreValue">0</span>
+                </div>
+                <div style="font-size: 14px; color: #000000;" id="scoreText">Initializing...</div>
+            </div>
+        </div>
+
+        <div class="footer">
+            Security Sentinel v2.0 • VirusTotal Integrated
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
